@@ -1,27 +1,77 @@
-# ulauncher-symbol
+# albert-plugin-python-symbol
 
-A [Ulauncher](https://ulauncher.io/) extension for searching Unicode and ASCII characters and copying them to the clipboard. Dark mode friendly.
+> An [Albert](https://albertlauncher.github.io/) plugin for searching Unicode and ASCII characters
 
-<kbd>Enter</kbd> to copy the symbol itself.
+Search and copy Unicode symbols to your clipboard. Find characters using their name, description, Unicode block names, or the characters themselves.
 
-<kbd>Alt+Enter</kbd> to copy the HTML entity (if it exists).
+## Features
 
-You can search for characters using their name or description, block names or the characters themselves.
+- 🔍 **Comprehensive Search** - Search by character name, description, Unicode block, code point, or the character itself
+- 📋 **Quick Copy** - Press <kbd>Enter</kbd> to copy the symbol to clipboard
+- 🌐 **HTML Entity Support** - Select "Copy HTML entity" action for HTML-compatible entities (e.g., `&copy;`, `&hearts;`)
+- ⚡ **Fast Indexing** - Uses Albert's native indexing for instant results
+- 🎨 **Visual Icons** - Character displayed as icon for easy identification
 
-## Demonstration
+## Usage
 
-![Demonstration of ulauncher-symbol](ulauncher-symbol-demo.gif)
+1. Type the trigger keyword `sym ` (or your custom trigger) in Albert
+2. Enter your search query (e.g., "arrow", "U+2764", "heart", "©")
+3. Press <kbd>Enter</kbd> to copy the symbol to clipboard
+4. Or select "Copy HTML entity to clipboard" for the HTML version (when available)
+
+### Usage Examples
+
+- `sym heart` - Find heart symbols
+- `sym arrow right` - Find right-pointing arrows  
+- `sym copyright` - Find copyright symbol
+- `sym 263A` - Search by Unicode code point
+- `sym ♥` - Search by the character itself
 
 ## Installation
 
-Open Ulauncher, go to `Preferences > Extensions > Add extension` and paste the project's URL: `https://github.com/rootwork/ulauncher-symbol.git`
+### Requirements
 
-You can also view this extension on the [Ulauncher Extensions website](https://ext.ulauncher.io/-/github-rootwork-ulauncher-symbol).
+This plugin requires the `htmlentities` Python package to provide HTML entity conversion.
 
-## Source
+### Install Steps
 
-Forked from [zensoup/ulauncher-unicode](https://github.com/zensoup/ulauncher-unicode) to add HTML entities, dark mode theming, fewer false positives in results, and an updated Unicode list.
+1. **Install the htmlentities package in Albert's virtual environment:**
+
+```bash
+# Activate Albert's virtual environment
+source ~/.local/share/albert/python/venv/bin/activate
+
+# Install htmlentities in Albert's venv
+pip install htmlentities
+
+# Deactivate the venv
+deactivate
+```
+
+2. Git clone this repository into your Albert plugins directory:
+
+```bash
+git clone https://github.com/ffpyt/albert-plugin-python-symbol.git ~/.local/share/albert/python/plugins/symbol
+```
+
+3. **Restart Albert**
+4. **Enable the plugin:**
+    - Open Albert settings
+    - Go to **Plugins** → **Python** → **Unicode Symbols**
+    - Enable the plugin
+    - Optionally customize the trigger keyword (default: `sym `)
+
+## Technical Details
+
+- **Plugin Type:** IndexQueryHandler (indexed search for fast results)
+- **Python API:** Albert v5.0
+- **Python package dependencies:** `htmlentities`
+- **Data Source:** (included) `unicode_list.txt`
+
+## Credits
+
+- This is a port of the [ulauncher-symbol](https://github.com/rootwork/ulauncher-symbol) extension by [@rootwork](https://github.com/rootwork) adapted to [Albert launcher](https://albertlauncher.github.io/)
+- [rootworks's ulauncher-symbol](https://github.com/rootwork/ulauncher-symbol) was forked from [ulauncher-unicode](https://github.com/zensoup/ulauncher-unicode) by [@zensoup](https://github.com/zensoup)
 
 ## License
-
-GPLv3. See [LICENCE](LICENCE).
+GPL-3.0. See [LICENCE](LICENCE)
