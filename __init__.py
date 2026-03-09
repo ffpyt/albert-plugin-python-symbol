@@ -63,28 +63,96 @@ def is_valid_char(char: UnicodeChar) -> bool:
     return True
 
 
-class Plugin(PluginInstance, IndexQueryHandler):
+class SymbolQueryHandler(IndexQueryHandler):
+    """Handles searching for Unicode symbols"""
+
+    def __init__(self, character_list: List[UnicodeChar]):
+        IndexQueryHandler.__init__(self)
+        self.character_list = character_list
+
+    def id(self) -> str:
+        return md_name
+
+    def name(self) -> str:
+        return md_name
+
+    def description(self) -> str:
+        return md_description
+
+    def defaultTrigger(self) -> str:
+        """Default trigger keyword"""
+        return "sym "
+
+    def updateIndexItems(self):
+        """Build the search index from character list"""
+        index_items = []
+
+        for char in self.character_list:
+            if not is_valid_char(char):
+                continue
+
+            # Get HTML entity if available
+            encoded = htmlentities.encode(char.character)
+            has_html_entity = "&" in encoded
+
+            # Build actions
+            actions = []
+
+            # Primary action: copy character
+            actions.append(
+                Action(
+                    "copy_char",
+                    "Copy symbol to clipboard",
+                    lambda c=char.character: setClipboardText(c)
+                )
+            )
+
+            # Secondary action: copy HTML entity if available
+            if has_html_entity:
+                actions.append(
+                    Action(
+                        "copy_html",
+                        "Copy HTML entity to clipboard",
+                        lambda html=encoded: setClipboardText(html)
+                    )
+                )
+
+            # Build subtext
+            subtext_parts = [char.block]
+            if has_html_entity:
+                subtext_parts.append(f"HTML: {encoded}")
+            subtext_parts.append(f"Code: U+{char.code}")
+            subtext = " • ".join(subtext_parts)
+
+            # Create item
+            item = StandardItem(
+                id=f"unicode_{char.code}",
+                text=f"{char.name.capitalize()} – {char.character}",
+                subtext=subtext,
+                icon_factory=lambda ch=char.character: Icon.grapheme(ch),
+                actions=actions,
+            )
+
+            # Add to index with searchable string
+            index_items.append(
+                IndexItem(item=item, string=char.get_search_string())
+            )
+
+        self.setIndexItems(index_items)
+        info(f"Indexed {len(index_items)} valid unicode characters")
+
+
+class Plugin(PluginInstance):
     """Albert plugin to search and copy Unicode symbols"""
 
     def __init__(self):
         PluginInstance.__init__(self)
-        IndexQueryHandler.__init__(self)
 
         # Load character table
-        self.character_list = self._load_character_table()  # type: List[UnicodeChar]
+        character_list = self._load_character_table()
 
-    def defaultTrigger(self):
-        """Default trigger keyword"""
-        return "sym "
-
-    def extensions(self):
-        """Register itself as extension as well (IndexQueryHandler mix-in class)"""
-        return [self]
-
-    def synopsis(self, query: str) -> str:
-        """Returns input hint for the query"""
-        # todo: check whether to remove when query isn't empty anymore
-        return "Search unicode symbols by name, code, or character"
+        # Create the query handler with the loaded character list
+        self.handler = SymbolQueryHandler(character_list)
 
     def _load_character_table(self) -> List[UnicodeChar]:
         """Read the data file and load to memory"""
@@ -117,75 +185,6 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
         return character_list
 
-    def updateIndexItems(self):
-        """Build the search index from character list"""
-        index_items = []
-
-        for char in self.character_list:
-            if not is_valid_char(char):
-                continue
-
-            # Create icon using grapheme (character itself)
-            def make_icon_factory(character):
-                def make_icon():
-                    return Icon.grapheme(character)
-                return make_icon
-
-            # Get HTML entity if available
-            encoded = htmlentities.encode(char.character)
-            has_html_entity = "&" in encoded
-
-            # Build actions
-            actions = []
-
-            # Primary action: copy character
-            def make_copy_char_action(character):
-                def set_clipboard():
-                    setClipboardText(character)
-                return set_clipboard
-
-            actions.append(
-                Action(
-                    "copy_char",
-                    "Copy symbol to clipboard",
-                    make_copy_char_action(char.character)
-                )
-            )
-
-            # Secondary action: copy HTML entity if available
-            if has_html_entity:
-                def make_copy_html_action(html):
-                    def copy_html():
-                        setClipboardText(html)
-                    return copy_html
-
-                actions.append(
-                    Action(
-                        "copy_html",
-                        "Copy HTML entity to clipboard",
-                        make_copy_html_action(encoded)
-                    )
-                )
-
-            # Build subtext
-            subtext_parts = [char.block]
-            if has_html_entity:
-                subtext_parts.append(f"HTML: {encoded}")
-            subtext_parts.append(f"Code: U+{char.code}")
-            subtext = " • ".join(subtext_parts)
-
-            # Create item
-            item = StandardItem(
-                id=f"unicode_{char.code}",
-                text=f"{char.name.capitalize()} – {char.character}",
-                subtext=subtext,
-                icon_factory=make_icon_factory(char.character),
-                actions=actions,
-            )
-
-            # Add to index with searchable string
-            index_items.append(
-                IndexItem(item=item, string=char.get_search_string())
-            )
-
-        self.setIndexItems(index_items)
+    def extensions(self):
+        """Register the query handler as an extension"""
+        return [self.handler]
