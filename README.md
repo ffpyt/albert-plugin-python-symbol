@@ -14,10 +14,12 @@ Search and copy Unicode symbols to your clipboard. Find characters using their n
 
 ## Usage
 
-1. Type the trigger keyword `sym ` (or your custom trigger) in Albert
+1. Type the trigger keyword `sym<space>` (or your custom trigger) in Albert
 2. Enter your search query (e.g., "arrow", "U+2764", "heart", "©")
 3. Press <kbd>Enter</kbd> to copy the symbol to clipboard
 4. Or select "Copy HTML entity to clipboard" for the HTML version (when available)
+
+By default the query
 
 ### Usage Examples
 
@@ -59,7 +61,10 @@ git clone https://github.com/ffpyt/albert-plugin-python-symbol.git ~/.local/shar
     - Open Albert settings
     - Go to **Plugins** → **Python** → **Unicode Symbols**
     - Enable the plugin
-    - Optionally customize the trigger keyword (default: `sym `)
+    - Review configuration in Query tab:
+      - Customize the trigger keyword (default: `sym<default>`)
+      - Disable global query handling to prevent symbols from showing in the search results w/o prior trigger keyword
+      - Enable fuzzy matching for symbols (not recommended) 
 
 ## Technical Details
 
