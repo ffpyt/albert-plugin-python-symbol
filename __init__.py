@@ -43,6 +43,26 @@ class UnicodeChar:
         return ' '.join([self.character, self.code, self.name, self.comment])
 
 
+def is_valid_char(char: UnicodeChar) -> bool:
+    """Check if the character is valid"""
+    # Skip surrogate pairs and other invalid/problematic characters
+    code_int = int(char.code, 16)
+    if 0xD800 <= code_int <= 0xDFFF:  # Surrogate pairs
+        return False
+    if code_int > 0x10FFFF:  # Beyond valid Unicode range
+        return False
+
+    # Skip characters that can't be properly displayed
+    try:
+        # Test if the character can be encoded/decoded properly
+        _ = char.character.encode('utf-8').decode('utf-8')
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        debug(f"Skipping invalid character U+{char.code}")
+        return False
+
+    return True
+
+
 class Plugin(PluginInstance, IndexQueryHandler):
     """Albert plugin to search and copy Unicode symbols"""
 
@@ -52,9 +72,6 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
         # Load character table
         self.character_list = self._load_character_table()  # type: List[UnicodeChar]
-
-        # Build index
-        self._build_index()
 
     def defaultTrigger(self):
         """Default trigger keyword"""
@@ -96,14 +113,19 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
         return character_list
 
-    def _build_index(self):
+    def updateIndexItems(self):
         """Build the search index from character list"""
         index_items = []
 
         for char in self.character_list:
+            if not is_valid_char(char):
+                continue
+
             # Create icon using grapheme (character itself)
             def make_icon_factory(character):
-                return lambda: Icon.grapheme(character)
+                def make_icon():
+                    return Icon.grapheme(character)
+                return make_icon
 
             # Get HTML entity if available
             encoded = htmlentities.encode(char.character)
@@ -114,7 +136,9 @@ class Plugin(PluginInstance, IndexQueryHandler):
 
             # Primary action: copy character
             def make_copy_char_action(character):
-                return lambda: setClipboardText(character)
+                def set_clipboard():
+                    setClipboardText(character)
+                return set_clipboard
 
             actions.append(
                 Action(
@@ -127,7 +151,9 @@ class Plugin(PluginInstance, IndexQueryHandler):
             # Secondary action: copy HTML entity if available
             if has_html_entity:
                 def make_copy_html_action(html):
-                    return lambda: setClipboardText(html)
+                    def copy_html():
+                        setClipboardText(html)
+                    return copy_html
 
                 actions.append(
                     Action(
@@ -150,7 +176,7 @@ class Plugin(PluginInstance, IndexQueryHandler):
                 text=f"{char.name.capitalize()} – {char.character}",
                 subtext=subtext,
                 icon_factory=make_icon_factory(char.character),
-                actions=actions
+                actions=actions,
             )
 
             # Add to index with searchable string
