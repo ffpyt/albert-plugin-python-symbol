@@ -15,11 +15,22 @@ Search and copy Unicode symbols to your clipboard. Find characters using their n
 ## Usage
 
 1. Type the trigger keyword `sym<space>` (or your custom trigger) in Albert
-2. Enter your search query (e.g., "arrow", "U+2764", "heart", "©")
+2. Enter your search query (e.g., "arrow", "U+2764", "heart", "©", "beta", "infinity")
 3. Press <kbd>Enter</kbd> to copy the symbol to clipboard
 4. Or select "Copy HTML entity to clipboard" for the HTML version (when available)
 
-By default the query
+![Screenshot-sym-trigger](images/sym_search.png)
+
+By default, global query handling is enabled, which makes unicode symbols
+show up even w/o prior trigger keyword mixed with other search results.
+This can be disabled in the Albert settings > Query tab > Unicode Symbols.
+
+The below screenshot shows this:
+
+- The first two entries are populated by Albert's built-in search and plugins
+- The following entries are populated by the Unicode symbols plugin
+
+![Screenshot-global-search](images/global_search.png)
 
 ### Usage Examples
 
@@ -28,6 +39,7 @@ By default the query
 - `sym copyright` - Find copyright symbol
 - `sym 263A` - Search by Unicode code point
 - `sym ♥` - Search by the character itself
+- `infinity` - Find unicode symbols in global search w/o trigger keyword if enabled
 
 ## Installation
 
@@ -61,7 +73,7 @@ git clone https://github.com/ffpyt/albert-plugin-python-symbol.git ~/.local/shar
     - Open Albert settings
     - Go to **Plugins** → **Python** → **Unicode Symbols**
     - Enable the plugin
-    - Review configuration in Query tab:
+    - Review configuration in the Query tab:
       - Customize the trigger keyword (default: `sym<default>`)
       - Disable global query handling to prevent symbols from showing in the search results w/o prior trigger keyword
       - Enable fuzzy matching for symbols (not recommended) 
