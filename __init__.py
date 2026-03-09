@@ -77,6 +77,10 @@ class Plugin(PluginInstance, IndexQueryHandler):
         """Default trigger keyword"""
         return "sym "
 
+    def extensions(self):
+        """Register itself as extension as well (IndexQueryHandler mix-in class)"""
+        return [self]
+
     def synopsis(self, query: str) -> str:
         """Returns input hint for the query"""
         # todo: check whether to remove when query isn't empty anymore
