@@ -62,7 +62,7 @@ pip install htmlentities
 deactivate
 ```
 
-2. Git clone this repository into your Albert plugins directory:
+2. **Git clone this repository into your Albert plugins directory:**
 
 ```bash
 git clone https://github.com/ffpyt/albert-plugin-python-symbol.git ~/.local/share/albert/python/plugins/symbol
